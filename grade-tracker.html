@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Notes - Sismondi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .add-grade-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 25px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-grade-btn:active {
+            transform: scale(0.98);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .subject-row {
+            background: white;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .subject-row:active {
+            transform: scale(0.99);
+            background: #f9fafb;
+        }
+
+        .subject-name {
+            font-weight: 700;
+            font-size: 20px;
+            color: #1f2937;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .semesters-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .semester-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .semester-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #6b7280;
+            min-width: 25px;
+        }
+
+        .grades-line {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            flex: 1;
+        }
+
+        .grade-badge {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .grade-delete {
+            color: #ef4444;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 22px;
+            line-height: 1;
+        }
+
+        .semestriel-badge {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            border: 2px solid #f59e0b;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .semestriel-empty {
+            color: #9ca3af;
+            font-size: 18px;
+            font-style: italic;
+        }
+
+        .empty-grades {
+            color: #9ca3af;
+            font-size: 18px;
+            font-style: italic;
+        }
+
+        .divider {
+            width: 3px;
+            height: 30px;
+            background: #d1d5db;
+            border-radius: 2px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 18px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .form-select, .form-input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 20px;
+            background: white;
+        }
+
+        .form-select:focus, .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            cursor: pointer;
+            user-select: none;
+            font-size: 18px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        /* Tabs */
+        .tab-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .tab-btn:active {
+            transform: scale(0.98);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Projections */
+        .metrics-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .metric-item {
+            background: #f7f9fc;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+
+        .metric-value {
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .metric-value.good { color: #10b981; }
+        .metric-value.warning { color: #f59e0b; }
+        .metric-value.danger { color: #ef4444; }
+
+        .slider-row {
+            background: white;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .slider-subject {
+            font-weight: 700;
+            font-size: 18px;
+            color: #1f2937;
+        }
+
+        .slider-value {
+            font-size: 24px;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 8px;
+        }
+
+        .slider-container {
+            position: relative;
+            height: 40px;
+            background: #e5e7eb;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .slider-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+            transition: all 0.2s;
+            border-radius: 20px;
+        }
+
+        .slider-fill.warning {
+            background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .slider-fill.danger {
+            background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .slider-input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .slider-target-line {
+            position: absolute;
+            left: 60%;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #1f2937;
+            z-index: 5;
+        }
+
+        .slider-current-marker {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 16px;
+            height: 16px;
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 50%;
+            z-index: 6;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider-markers {
+            position: absolute;
+            width: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .slider-marker {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        .status-banner {
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .status-banner.pass {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-banner.tolerance {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-banner.fail {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        @media (max-width: 600px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Mes Notes</h1>
+        </div>
+
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab('grades')">Mes Notes</button>
+            <button class="tab-btn" onclick="switchTab('projections')">Projections</button>
+        </div>
+
+        <!-- Grades Tab -->
+        <div id="gradesTab" class="tab-content active">
+            <button class="add-grade-btn" onclick="openAddGradeModal()" style="width: 100%; margin-bottom: 15px;">+ Ajouter une Note</button>
+            <div id="gradesContainer"></div>
+        </div>
+
+        <!-- Projections Tab -->
+        <div id="projectionsTab" class="tab-content">
+            <div id="statusBanner" class="status-banner"></div>
+
+            <div class="metrics-card">
+                <div style="font-size: 20px; font-weight: 700; margin-bottom: 12px; color: #1f2937;">📊 Situation</div>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <div class="metric-label">Moyenne</div>
+                        <div class="metric-value" id="projAvg">-</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Option Spé.</div>
+                        <div class="metric-value" id="projOS">-</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Total Critique</div>
+                        <div class="metric-value" id="projCrit">-</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Insuffisances</div>
+                        <div class="metric-value" id="projInsuff">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: white; border-radius: 12px; padding: 12px; margin-bottom: 12px;">
+                <div style="font-size: 16px; font-weight: 700; color: #1f2937; margin-bottom: 8px;">
+                    💡 Glisse les barres pour simuler
+                </div>
+                <div style="font-size: 14px; color: #6b7280;">
+                    Ajuste les moyennes et vois l'impact sur ta promotion
+                </div>
+            </div>
+
+            <div id="slidersContainer"></div>
+        </div>
+    </div>
+
+    <!-- Add Grade Modal -->
+    <div id="addGradeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title" id="modalTitle">Ajouter une Note</div>
+
+            <div class="form-group">
+                <label class="form-label">Matière</label>
+                <select class="form-select" id="subjectSelect">
+                    <option value="">-- Choisir --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Semestre</label>
+                <select class="form-select" id="semesterSelect">
+                    <option value="1">Semestre 1</option>
+                    <option value="2">Semestre 2</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Note (1.0 - 6.0)</label>
+                <input type="number" class="form-input" id="gradeInput"
+                       min="1" max="6" step="0.5" placeholder="4.5">
+            </div>
+
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="semestrielCheckbox">
+                    <label for="semestrielCheckbox" class="form-label" style="margin: 0;">
+                        C'est un Semestriel
+                    </label>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+                <button class="btn btn-primary" onclick="saveGrade()">Ajouter</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUBJECT_WEIGHTS = {
+            'Allemand': { regular: 2/3, semestriels: 1/3 },
+            'Anglais': { regular: 2/3, semestriels: 1/3 },
+            'Biologie': { regular: 2/3, semestriels: 1/3 },
+            'Chimie': { regular: 1/2, semestriels: 1/2 },
+            'Droit': { regular: 1/2, semestriels: 1/2 },
+            'Economie': { regular: 1/2, semestriels: 1/2 },
+            'Français': { regular: 1/2, semestriels: 1/2 },
+            'Géographie': { regular: 1/2, semestriels: 1/2 },
+            'Histoire': { regular: 1/2, semestriels: 1/2 },
+            'Math': { regular: 1/2, semestriels: 1/2 },
+            'Physique': { regular: 3/5, semestriels: 2/5 },
+            'Histoire de l\'Art': { regular: 1/2, semestriels: 1/2 },
+            'Art': { regular: 1/2, semestriels: 1/2 },
+            'Gym': { regular: 1/2, semestriels: 1/2 },
+            'Informatique': { regular: 1/2, semestriels: 1/2 }
+        };
+
+        let gradesData = {
+            'Allemand': {
+                semester1: { regular: [3.0], semestriel: null },
+                semester2: { regular: [], semestriel: null }
+            },
+            'Anglais': {
+                semester1: { regular: [4.5], semestriel: null },
+                semester2: { regular: [], semestriel: null }
+            },
+            'Art': {
+                semester1: { regular: [], semestriel: null },
+                semester2: { regular: [], semestriel: null }
+            },
+            'Biologie': {
+                semester1: { regular: [4.5, 5.5, 5.0], semestriel: null },
+                semester2: { regular: [], semestriel: null }
+            },
+            'Chimie': {
+                semester1: { regular: [2.5, 2.5, 4.5], semestriel: null },
+                semester2: { regular: [], semestriel: null }
+            },
+            'Droit': {
+                semester1: { regular: [4.5], semestriel: null },
+                semester2: { regular: [], semestriel: null }
+            },
+            'Economie': {
+                semester1: { regular: [5.0], semestriel: null },
+                semester2: { regular: [], semestriel: null }
+            },
+            'Français': {
+                semester1: { regular: [3.0, 3.5], semestriel: null },
+                semester2: { regular: [], semestriel: null }
+            },
+            'Géographie': {
+                semester1: { regular: [4.5], semestriel: null },
+                semester2: { regular: [], semestriel: null }
+            },
+            'Gym': {
+                semester1: { regular: [], semestriel: null },
+                semester2: { regular: [], semestriel: null }
+            },
+            'Histoire': {
+                semester1: { regular: [], semestriel: null },
+                semester2: { regular: [], semestriel: null }
+            },
+            'Histoire de l\'Art': {
+                semester1: { regular: [5.0, 5.0], semestriel: null },
+                semester2: { regular: [], semestriel: null }
+            },
+            'Informatique': {
+                semester1: { regular: [5.0], semestriel: null },
+                semester2: { regular: [], semestriel: null }
+            },
+            'Math': {
+                semester1: { regular: [3.5, 3.0], semestriel: null },
+                semester2: { regular: [], semestriel: null }
+            },
+            'Physique': {
+                semester1: { regular: [4.0, 5.0], semestriel: null },
+                semester2: { regular: [], semestriel: null }
+            }
+        };
+
+        let selectedSubject = null;
+        let projectedAverages = {};
+
+        function initializeData() {
+            try {
+                const savedData = localStorage.getItem('sismondiGrades');
+                if (savedData) {
+                    const loadedData = JSON.parse(savedData);
+
+                    // Check if data needs migration from old format
+                    const firstSubject = Object.keys(loadedData)[0];
+                    if (firstSubject && loadedData[firstSubject].regular !== undefined) {
+                        // Old format detected - migrate to new format
+                        console.log('Migrating old data format to two-semester format');
+                        const migratedData = {};
+                        Object.keys(loadedData).forEach(subject => {
+                            migratedData[subject] = {
+                                semester1: {
+                                    regular: loadedData[subject].regular || [],
+                                    semestriel: loadedData[subject].semestriel || null
+                                },
+                                semester2: {
+                                    regular: [],
+                                    semestriel: null
+                                }
+                            };
+                        });
+                        gradesData = migratedData;
+                        saveData(); // Save migrated data
+                    } else {
+                        // New format - use as is
+                        gradesData = loadedData;
+                    }
+                }
+            } catch (e) {
+                console.log('localStorage not available, using default data');
+            }
+        }
+
+        function saveData() {
+            try {
+                localStorage.setItem('sismondiGrades', JSON.stringify(gradesData));
+            } catch (e) {
+                console.log('Could not save to localStorage');
+            }
+        }
+
+        function populateSubjectSelect() {
+            const select = document.getElementById('subjectSelect');
+            select.innerHTML = '<option value="">-- Choisir --</option>';
+            Object.keys(SUBJECT_WEIGHTS).sort().forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject;
+                option.textContent = subject;
+                select.appendChild(option);
+            });
+        }
+
+        // Calculate average of grades
+        function calculateAverage(grades) {
+            if (!grades || grades.length === 0) return null;
+            return grades.reduce((a, b) => a + b, 0) / grades.length;
+        }
+
+        // Calculate semester average for a subject
+        function calculateSemesterAverage(subject, semester) {
+            const data = gradesData[subject][semester];
+            const weights = SUBJECT_WEIGHTS[subject];
+
+            const regularAvg = calculateAverage(data.regular);
+            const semestriel = data.semestriel;
+
+            if (regularAvg === null && semestriel === null) return null;
+            if (regularAvg === null) return semestriel;
+            if (semestriel === null) return regularAvg;
+
+            return (regularAvg * weights.regular) + (semestriel * weights.semestriels);
+        }
+
+        // Calculate annual average for a subject
+        function calculateAnnualAverage(subject) {
+            const s1Avg = calculateSemesterAverage(subject, 'semester1');
+            const s2Avg = calculateSemesterAverage(subject, 'semester2');
+
+            // Check if semester 1 semestriel exists
+            const s1SemestrielExists = gradesData[subject].semester1.semestriel !== null;
+
+            if (!s1SemestrielExists) {
+                // Before S1 semestriel: only S1 counts as if it's the full year
+                return s1Avg;
+            } else {
+                // After S1 semestriel: both semesters count equally
+                if (s1Avg === null && s2Avg === null) return null;
+                if (s1Avg === null) return s2Avg;
+                if (s2Avg === null) return s1Avg;
+                return (s1Avg + s2Avg) / 2;
+            }
+        }
+
+        function renderGrades() {
+            const container = document.getElementById('gradesContainer');
+            container.innerHTML = '';
+
+            Object.keys(gradesData).sort().forEach(subject => {
+                const data = gradesData[subject];
+
+                const row = document.createElement('div');
+                row.className = 'subject-row';
+
+                const subjectNameDiv = document.createElement('div');
+                subjectNameDiv.className = 'subject-name';
+                subjectNameDiv.textContent = subject;
+
+                const semestersContainer = document.createElement('div');
+                semestersContainer.className = 'semesters-container';
+
+                // Semester 1
+                const s1Row = document.createElement('div');
+                s1Row.className = 'semester-row';
+
+                const s1Label = document.createElement('div');
+                s1Label.className = 'semester-label';
+                s1Label.textContent = 'S1';
+
+                const s1Grades = document.createElement('div');
+                s1Grades.className = 'grades-line';
+
+                // Regular grades S1
+                if (data.semester1.regular.length > 0) {
+                    data.semester1.regular.forEach((grade, index) => {
+                        const badge = document.createElement('span');
+                        badge.className = 'grade-badge';
+                        badge.textContent = grade.toFixed(1) + ' ';
+
+                        const deleteBtn = document.createElement('span');
+                        deleteBtn.className = 'grade-delete';
+                        deleteBtn.textContent = '×';
+                        deleteBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            deleteGrade(subject, 1, index, false);
+                        };
+
+                        badge.appendChild(deleteBtn);
+                        s1Grades.appendChild(badge);
+                    });
+                } else {
+                    const emptySpan = document.createElement('span');
+                    emptySpan.className = 'empty-grades';
+                    emptySpan.textContent = '-';
+                    s1Grades.appendChild(emptySpan);
+                }
+
+                // Divider
+                const divider1 = document.createElement('div');
+                divider1.className = 'divider';
+                s1Grades.appendChild(divider1);
+
+                // Semestriel S1
+                if (data.semester1.semestriel !== null) {
+                    const badge = document.createElement('span');
+                    badge.className = 'semestriel-badge';
+                    badge.textContent = data.semester1.semestriel.toFixed(1) + ' ';
+
+                    const deleteBtn = document.createElement('span');
+                    deleteBtn.className = 'grade-delete';
+                    deleteBtn.textContent = '×';
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        deleteGrade(subject, 1, 0, true);
+                    };
+
+                    badge.appendChild(deleteBtn);
+                    s1Grades.appendChild(badge);
+                } else {
+                    const emptySpan = document.createElement('span');
+                    emptySpan.className = 'semestriel-empty';
+                    emptySpan.textContent = 'Sem -';
+                    s1Grades.appendChild(emptySpan);
+                }
+
+                s1Row.appendChild(s1Label);
+                s1Row.appendChild(s1Grades);
+
+                // Semester 2
+                const s2Row = document.createElement('div');
+                s2Row.className = 'semester-row';
+
+                const s2Label = document.createElement('div');
+                s2Label.className = 'semester-label';
+                s2Label.textContent = 'S2';
+
+                const s2Grades = document.createElement('div');
+                s2Grades.className = 'grades-line';
+
+                // Regular grades S2
+                if (data.semester2.regular.length > 0) {
+                    data.semester2.regular.forEach((grade, index) => {
+                        const badge = document.createElement('span');
+                        badge.className = 'grade-badge';
+                        badge.textContent = grade.toFixed(1) + ' ';
+
+                        const deleteBtn = document.createElement('span');
+                        deleteBtn.className = 'grade-delete';
+                        deleteBtn.textContent = '×';
+                        deleteBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            deleteGrade(subject, 2, index, false);
+                        };
+
+                        badge.appendChild(deleteBtn);
+                        s2Grades.appendChild(badge);
+                    });
+                } else {
+                    const emptySpan = document.createElement('span');
+                    emptySpan.className = 'empty-grades';
+                    emptySpan.textContent = '-';
+                    s2Grades.appendChild(emptySpan);
+                }
+
+                // Divider
+                const divider2 = document.createElement('div');
+                divider2.className = 'divider';
+                s2Grades.appendChild(divider2);
+
+                // Semestriel S2
+                if (data.semester2.semestriel !== null) {
+                    const badge = document.createElement('span');
+                    badge.className = 'semestriel-badge';
+                    badge.textContent = data.semester2.semestriel.toFixed(1) + ' ';
+
+                    const deleteBtn = document.createElement('span');
+                    deleteBtn.className = 'grade-delete';
+                    deleteBtn.textContent = '×';
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        deleteGrade(subject, 2, 0, true);
+                    };
+
+                    badge.appendChild(deleteBtn);
+                    s2Grades.appendChild(badge);
+                } else {
+                    const emptySpan = document.createElement('span');
+                    emptySpan.className = 'semestriel-empty';
+                    emptySpan.textContent = 'Sem -';
+                    s2Grades.appendChild(emptySpan);
+                }
+
+                s2Row.appendChild(s2Label);
+                s2Row.appendChild(s2Grades);
+
+                semestersContainer.appendChild(s1Row);
+                semestersContainer.appendChild(s2Row);
+
+                row.appendChild(subjectNameDiv);
+                row.appendChild(semestersContainer);
+
+                row.onclick = (e) => {
+                    if (!e.target.classList.contains('grade-delete')) {
+                        openSubjectModal(subject);
+                    }
+                };
+
+                container.appendChild(row);
+            });
+        }
+
+        function openAddGradeModal() {
+            selectedSubject = null;
+            document.getElementById('modalTitle').textContent = 'Ajouter une Note';
+            document.getElementById('subjectSelect').disabled = false;
+            document.getElementById('subjectSelect').value = '';
+            document.getElementById('semesterSelect').value = '1';
+            document.getElementById('gradeInput').value = '';
+            document.getElementById('semestrielCheckbox').checked = false;
+            document.getElementById('addGradeModal').classList.add('active');
+        }
+
+        function openSubjectModal(subject) {
+            selectedSubject = subject;
+            document.getElementById('modalTitle').textContent = `Ajouter une Note - ${subject}`;
+            document.getElementById('subjectSelect').value = subject;
+            document.getElementById('subjectSelect').disabled = true;
+            document.getElementById('semesterSelect').value = '1';
+            document.getElementById('gradeInput').value = '';
+            document.getElementById('semestrielCheckbox').checked = false;
+            document.getElementById('addGradeModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('addGradeModal').classList.remove('active');
+            selectedSubject = null;
+        }
+
+        function saveGrade() {
+            const subject = selectedSubject || document.getElementById('subjectSelect').value;
+            const semester = parseInt(document.getElementById('semesterSelect').value);
+            const gradeValue = parseFloat(document.getElementById('gradeInput').value);
+            const isSemestriel = document.getElementById('semestrielCheckbox').checked;
+
+            if (!subject) {
+                alert('Veuillez choisir une matière');
+                return;
+            }
+
+            if (isNaN(gradeValue) || gradeValue < 1 || gradeValue > 6) {
+                alert('Veuillez entrer une note entre 1.0 et 6.0');
+                return;
+            }
+
+            if (!gradesData[subject]) {
+                gradesData[subject] = {
+                    semester1: { regular: [], semestriel: null },
+                    semester2: { regular: [], semestriel: null }
+                };
+            }
+
+            const semesterKey = 'semester' + semester;
+
+            if (isSemestriel) {
+                gradesData[subject][semesterKey].semestriel = gradeValue;
+            } else {
+                gradesData[subject][semesterKey].regular.push(gradeValue);
+            }
+
+            saveData();
+            renderGrades();
+            closeModal();
+        }
+
+        function deleteGrade(subject, semester, index, isSemestriel) {
+            if (!confirm('Supprimer cette note?')) return;
+
+            const semesterKey = 'semester' + semester;
+
+            if (isSemestriel) {
+                gradesData[subject][semesterKey].semestriel = null;
+            } else {
+                gradesData[subject][semesterKey].regular.splice(index, 1);
+            }
+
+            saveData();
+            renderGrades();
+        }
+
+        // Projections functionality
+        function switchTab(tabName) {
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            if (tabName === 'grades') {
+                document.getElementById('gradesTab').classList.add('active');
+            } else if (tabName === 'projections') {
+                document.getElementById('projectionsTab').classList.add('active');
+                initializeProjections();
+            }
+        }
+
+        function initializeProjections() {
+            projectedAverages = {};
+            Object.keys(gradesData).forEach(subject => {
+                const annualAvg = calculateAnnualAverage(subject);
+                projectedAverages[subject] = annualAvg !== null ? annualAvg : 4.0;
+            });
+
+            renderSliders();
+            updateProjectionMetrics();
+        }
+
+        function renderSliders() {
+            const container = document.getElementById('slidersContainer');
+            container.innerHTML = '';
+
+            Object.keys(gradesData).sort().forEach(subject => {
+                const currentAvg = calculateAnnualAverage(subject) || 4.0;
+                const value = projectedAverages[subject] || currentAvg;
+
+                const row = document.createElement('div');
+                row.className = 'slider-row';
+
+                const header = document.createElement('div');
+                header.className = 'slider-header';
+
+                const subjectName = document.createElement('div');
+                subjectName.className = 'slider-subject';
+                subjectName.textContent = subject;
+
+                const valueDisplay = document.createElement('div');
+                valueDisplay.className = 'slider-value';
+                valueDisplay.id = 'slider-value-' + subject.replace(/[^a-zA-Z0-9]/g, '_');
+                valueDisplay.textContent = value.toFixed(1);
+                updateValueColor(valueDisplay, value);
+
+                header.appendChild(subjectName);
+                header.appendChild(valueDisplay);
+
+                const sliderContainer = document.createElement('div');
+                sliderContainer.className = 'slider-container';
+
+                const fill = document.createElement('div');
+                fill.className = 'slider-fill';
+                fill.id = 'slider-fill-' + subject.replace(/[^a-zA-Z0-9]/g, '_');
+                fill.style.width = (((value - 1.0) / 5.0) * 100) + '%';
+                updateFillColor(fill, value);
+
+                const targetLine = document.createElement('div');
+                targetLine.className = 'slider-target-line';
+
+                const currentMarker = document.createElement('div');
+                currentMarker.className = 'slider-current-marker';
+                currentMarker.style.left = (((currentAvg - 1.0) / 5.0) * 100) + '%';
+
+                const markers = document.createElement('div');
+                markers.className = 'slider-markers';
+                markers.innerHTML = '<span class="slider-marker">1.0</span><span class="slider-marker">4.0</span><span class="slider-marker">6.0</span>';
+
+                const input = document.createElement('input');
+                input.type = 'range';
+                input.min = '1.0';
+                input.max = '6.0';
+                input.step = '0.1';
+                input.value = value;
+                input.className = 'slider-input';
+
+                input.addEventListener('input', (e) => {
+                    const newValue = parseFloat(e.target.value);
+                    projectedAverages[subject] = newValue;
+
+                    valueDisplay.textContent = newValue.toFixed(1);
+                    updateValueColor(valueDisplay, newValue);
+
+                    fill.style.width = (((newValue - 1.0) / 5.0) * 100) + '%';
+                    updateFillColor(fill, newValue);
+
+                    updateProjectionMetrics();
+                });
+
+                sliderContainer.appendChild(fill);
+                sliderContainer.appendChild(targetLine);
+                sliderContainer.appendChild(currentMarker);
+                sliderContainer.appendChild(markers);
+                sliderContainer.appendChild(input);
+
+                row.appendChild(header);
+                row.appendChild(sliderContainer);
+                container.appendChild(row);
+            });
+        }
+
+        function updateValueColor(element, value) {
+            element.className = 'slider-value';
+            if (value >= 4.0) {
+                element.classList.add('good');
+            } else if (value >= 3.5) {
+                element.classList.add('warning');
+            } else {
+                element.classList.add('danger');
+            }
+        }
+
+        function updateFillColor(element, value) {
+            element.className = 'slider-fill';
+            if (value >= 4.0) {
+                // Keep good color (default)
+            } else if (value >= 3.5) {
+                element.classList.add('warning');
+            } else {
+                element.classList.add('danger');
+            }
+        }
+
+        function updateProjectionMetrics() {
+            const averages = projectedAverages;
+
+            const validAverages = Object.values(averages).filter(avg => avg !== null && avg !== undefined);
+            const generalAvg = validAverages.length > 0
+                ? validAverages.reduce((a, b) => a + b, 0) / validAverages.length
+                : 0;
+
+            const ecoAvg = averages['Economie'];
+            const droitAvg = averages['Droit'];
+            const optionSpecifique = (ecoAvg && droitAvg)
+                ? (ecoAvg + droitAvg) / 2
+                : (ecoAvg || droitAvg || 0);
+
+            const frAvg = averages['Français'] || 0;
+            const deAvg = averages['Allemand'] || 0;
+            const enAvg = averages['Anglais'] || 0;
+            const mathAvg = averages['Math'] || 0;
+
+            const langAvg = (deAvg + enAvg) / 2;
+            const criticalTotal = frAvg + langAvg + mathAvg + optionSpecifique;
+
+            const insufficient = [];
+            Object.keys(averages).forEach(subject => {
+                const avg = averages[subject];
+                if (avg !== null && avg !== undefined && avg < 4.0) {
+                    insufficient.push({ subject, grade: avg, deficit: 4.0 - avg });
+                }
+            });
+
+            const totalDeficit = insufficient.reduce((sum, item) => sum + item.deficit, 0);
+
+            updateMetricDisplay('projAvg', generalAvg, 4.0);
+            updateMetricDisplay('projOS', optionSpecifique, 4.0);
+            updateMetricDisplay('projCrit', criticalTotal, 16.0);
+
+            const insuffElem = document.getElementById('projInsuff');
+            insuffElem.textContent = insufficient.length + ' (' + totalDeficit.toFixed(1) + ')';
+            insuffElem.className = 'metric-value';
+            if (insufficient.length === 0) {
+                insuffElem.classList.add('good');
+            } else if (insufficient.length <= 3 && totalDeficit <= 1.0) {
+                insuffElem.classList.add('warning');
+            } else {
+                insuffElem.classList.add('danger');
+            }
+
+            let status = '';
+            let statusClass = '';
+
+            if (insufficient.length === 0) {
+                status = '✅ Promotion Directe';
+                statusClass = 'pass';
+            } else {
+                const conditions = {
+                    generalAvg: generalAvg >= 4.0,
+                    optionSpec: optionSpecifique >= 4.0,
+                    insuffCount: insufficient.length <= 3,
+                    deficitOk: totalDeficit <= 1.0,
+                    criticalOk: criticalTotal >= 16.0
+                };
+
+                if (conditions.generalAvg && conditions.optionSpec &&
+                    conditions.insuffCount && conditions.deficitOk && conditions.criticalOk) {
+                    status = '⚠️ Promotion par Tolérance';
+                    statusClass = 'tolerance';
+                } else {
+                    status = '❌ Risque de Non-Promotion';
+                    statusClass = 'fail';
+                }
+            }
+
+            const statusBanner = document.getElementById('statusBanner');
+            statusBanner.textContent = status;
+            statusBanner.className = 'status-banner ' + statusClass;
+        }
+
+        function updateMetricDisplay(elementId, value, threshold) {
+            const elem = document.getElementById(elementId);
+            elem.textContent = value.toFixed(2);
+            elem.className = 'metric-value';
+
+            if (value >= threshold) {
+                elem.classList.add('good');
+            } else if (value >= threshold - 0.5) {
+                elem.classList.add('warning');
+            } else {
+                elem.classList.add('danger');
+            }
+        }
+
+        document.getElementById('addGradeModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        try {
+            initializeData();
+            populateSubjectSelect();
+            renderGrades();
+            console.log('App initialized successfully');
+        } catch (error) {
+            console.error('Error initializing app:', error);
+            document.getElementById('gradesContainer').innerHTML =
+                '<div style="color: white; padding: 20px; background: #ef4444; border-radius: 10px; margin: 20px;">ERROR: ' + error.message + '</div>';
+        }
+    </script>
+</body>
+</html>
