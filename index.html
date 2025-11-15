@@ -84,7 +84,8 @@
         }
 
         .semester-row {
-            display: flex;
+            display: grid;
+            grid-template-columns: 25px 1fr auto;
             align-items: center;
             gap: 10px;
         }
@@ -93,7 +94,6 @@
             font-size: 14px;
             font-weight: 600;
             color: #6b7280;
-            min-width: 25px;
         }
 
         .grades-line {
@@ -101,7 +101,13 @@
             flex-wrap: wrap;
             gap: 6px;
             align-items: center;
-            flex: 1;
+        }
+
+        .semestriel-cell {
+            min-width: 120px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
         }
 
         .grade-badge {
@@ -546,14 +552,6 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">Semestre</label>
-                <select class="form-select" id="semesterSelect">
-                    <option value="1">Semestre 1</option>
-                    <option value="2">Semestre 2</option>
-                </select>
-            </div>
-
-            <div class="form-group">
                 <label class="form-label">Note (1.0 - 6.0)</label>
                 <input type="number" class="form-input" id="gradeInput"
                        min="1" max="6" step="0.5" placeholder="4.5">
@@ -566,6 +564,10 @@
                         C'est un Semestriel
                     </label>
                 </div>
+            </div>
+
+            <div id="semesterInfo" style="background: #eff6ff; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; color: #1e40af;">
+                <!-- Auto-detected semester info will appear here -->
             </div>
 
             <div class="button-group">
@@ -809,12 +811,13 @@
                     s1Grades.appendChild(emptySpan);
                 }
 
-                // Divider
-                const divider1 = document.createElement('div');
-                divider1.className = 'divider';
-                s1Grades.appendChild(divider1);
+                s1Row.appendChild(s1Label);
+                s1Row.appendChild(s1Grades);
 
-                // Semestriel S1
+                // Semestriel S1 (in separate cell for alignment)
+                const s1SemestrielCell = document.createElement('div');
+                s1SemestrielCell.className = 'semestriel-cell';
+
                 if (data.semester1.semestriel !== null) {
                     const badge = document.createElement('span');
                     badge.className = 'semestriel-badge';
@@ -829,16 +832,15 @@
                     };
 
                     badge.appendChild(deleteBtn);
-                    s1Grades.appendChild(badge);
+                    s1SemestrielCell.appendChild(badge);
                 } else {
                     const emptySpan = document.createElement('span');
                     emptySpan.className = 'semestriel-empty';
                     emptySpan.textContent = 'Sem -';
-                    s1Grades.appendChild(emptySpan);
+                    s1SemestrielCell.appendChild(emptySpan);
                 }
 
-                s1Row.appendChild(s1Label);
-                s1Row.appendChild(s1Grades);
+                s1Row.appendChild(s1SemestrielCell);
 
                 // Semester 2
                 const s2Row = document.createElement('div');
@@ -876,12 +878,13 @@
                     s2Grades.appendChild(emptySpan);
                 }
 
-                // Divider
-                const divider2 = document.createElement('div');
-                divider2.className = 'divider';
-                s2Grades.appendChild(divider2);
+                s2Row.appendChild(s2Label);
+                s2Row.appendChild(s2Grades);
 
-                // Semestriel S2
+                // Semestriel S2 (in separate cell for alignment)
+                const s2SemestrielCell = document.createElement('div');
+                s2SemestrielCell.className = 'semestriel-cell';
+
                 if (data.semester2.semestriel !== null) {
                     const badge = document.createElement('span');
                     badge.className = 'semestriel-badge';
@@ -896,16 +899,15 @@
                     };
 
                     badge.appendChild(deleteBtn);
-                    s2Grades.appendChild(badge);
+                    s2SemestrielCell.appendChild(badge);
                 } else {
                     const emptySpan = document.createElement('span');
                     emptySpan.className = 'semestriel-empty';
                     emptySpan.textContent = 'Sem -';
-                    s2Grades.appendChild(emptySpan);
+                    s2SemestrielCell.appendChild(emptySpan);
                 }
 
-                s2Row.appendChild(s2Label);
-                s2Row.appendChild(s2Grades);
+                s2Row.appendChild(s2SemestrielCell);
 
                 semestersContainer.appendChild(s1Row);
                 semestersContainer.appendChild(s2Row);
@@ -923,15 +925,57 @@
             });
         }
 
+        function updateSemesterInfo(subject) {
+            if (!subject || !gradesData[subject]) {
+                document.getElementById('semesterInfo').innerHTML = '';
+                return;
+            }
+
+            const s1Sem = gradesData[subject].semester1.semestriel;
+            const s2Sem = gradesData[subject].semester2.semestriel;
+            const isSemestriel = document.getElementById('semestrielCheckbox').checked;
+
+            let message = '';
+            let canAdd = true;
+
+            if (isSemestriel) {
+                if (s1Sem === null) {
+                    message = '📝 Ajout au <strong>Semestre 1</strong>';
+                } else if (s2Sem === null) {
+                    message = '📝 Ajout au <strong>Semestre 2</strong>';
+                } else {
+                    message = '⚠️ <strong>Les 2 semestriels sont déjà entrés</strong>';
+                    canAdd = false;
+                }
+            } else {
+                if (s1Sem === null) {
+                    message = '📝 Ajout au <strong>Semestre 1</strong> (notes régulières)';
+                } else {
+                    message = '📝 Ajout au <strong>Semestre 2</strong> (notes régulières)';
+                }
+            }
+
+            document.getElementById('semesterInfo').innerHTML = message;
+            document.querySelector('.btn-primary').disabled = !canAdd;
+        }
+
         function openAddGradeModal() {
             selectedSubject = null;
             document.getElementById('modalTitle').textContent = 'Ajouter une Note';
             document.getElementById('subjectSelect').disabled = false;
             document.getElementById('subjectSelect').value = '';
-            document.getElementById('semesterSelect').value = '1';
             document.getElementById('gradeInput').value = '';
             document.getElementById('semestrielCheckbox').checked = false;
+            document.getElementById('semesterInfo').innerHTML = '';
             document.getElementById('addGradeModal').classList.add('active');
+
+            // Add listeners for updates
+            document.getElementById('subjectSelect').onchange = () => {
+                updateSemesterInfo(document.getElementById('subjectSelect').value);
+            };
+            document.getElementById('semestrielCheckbox').onchange = () => {
+                updateSemesterInfo(selectedSubject || document.getElementById('subjectSelect').value);
+            };
         }
 
         function openSubjectModal(subject) {
@@ -939,10 +983,16 @@
             document.getElementById('modalTitle').textContent = `Ajouter une Note - ${subject}`;
             document.getElementById('subjectSelect').value = subject;
             document.getElementById('subjectSelect').disabled = true;
-            document.getElementById('semesterSelect').value = '1';
             document.getElementById('gradeInput').value = '';
             document.getElementById('semestrielCheckbox').checked = false;
             document.getElementById('addGradeModal').classList.add('active');
+
+            updateSemesterInfo(subject);
+
+            // Add listener for checkbox updates
+            document.getElementById('semestrielCheckbox').onchange = () => {
+                updateSemesterInfo(subject);
+            };
         }
 
         function closeModal() {
@@ -952,7 +1002,6 @@
 
         function saveGrade() {
             const subject = selectedSubject || document.getElementById('subjectSelect').value;
-            const semester = parseInt(document.getElementById('semesterSelect').value);
             const gradeValue = parseFloat(document.getElementById('gradeInput').value);
             const isSemestriel = document.getElementById('semestrielCheckbox').checked;
 
@@ -971,6 +1020,30 @@
                     semester1: { regular: [], semestriel: null },
                     semester2: { regular: [], semestriel: null }
                 };
+            }
+
+            // AUTO-DETECT which semester to add to
+            let semester = 1;
+            const s1Sem = gradesData[subject].semester1.semestriel;
+            const s2Sem = gradesData[subject].semester2.semestriel;
+
+            if (isSemestriel) {
+                // For semestriel grades
+                if (s1Sem === null) {
+                    semester = 1;
+                } else if (s2Sem === null) {
+                    semester = 2;
+                } else {
+                    alert('Les 2 semestriels sont déjà entrés pour cette matière');
+                    return;
+                }
+            } else {
+                // For regular grades
+                if (s1Sem === null) {
+                    semester = 1; // Before S1 semestriel, add to S1
+                } else {
+                    semester = 2; // After S1 semestriel, add to S2
+                }
             }
 
             const semesterKey = 'semester' + semester;
