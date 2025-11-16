@@ -729,6 +729,25 @@
         </div>
     </div>
 
+    <!-- Grade Options Modal -->
+    <div id="gradeOptionsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title" id="gradeOptionsTitle">Note: 4.5</div>
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button class="btn btn-primary" onclick="modifyGradeFromOptions()" style="background: #3b82f6;">
+                    Modifier la Note
+                </button>
+                <button class="btn btn-secondary" onclick="deleteGradeFromOptions()" style="background: #ef4444; color: white;">
+                    Supprimer la Note
+                </button>
+                <button class="btn btn-secondary" onclick="closeGradeOptionsModal()">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const SUBJECT_WEIGHTS = {
             'Allemand': { regular: 2/3, semestriels: 1/3 },
@@ -813,6 +832,7 @@
 
         let selectedSubject = null;
         let editingGrade = null; // { subject, semester, index, isSemestriel }
+        let currentGradeOptions = null; // { subject, semester, index, isSemestriel, gradeValue }
         let projectedAverages = {};
 
         function initializeData() {
@@ -1336,16 +1356,43 @@
                 weight = gradeObj.weight;
             }
 
-            const message = `Note: ${gradeValue.toFixed(1)}\n\nQue veux-tu faire?`;
-            const choice = confirm(message + '\n\nOK = Modifier | Annuler = Supprimer');
+            // Store current grade info
+            currentGradeOptions = { subject, semester, index, isSemestriel, gradeValue };
 
-            if (choice) {
-                // Edit
-                editGrade(subject, semester, index, isSemestriel);
-            } else {
-                // Delete
-                deleteGrade(subject, semester, index, isSemestriel);
-            }
+            // Update modal title
+            document.getElementById('gradeOptionsTitle').textContent = `Note: ${gradeValue.toFixed(1)}`;
+
+            // Show modal
+            document.getElementById('gradeOptionsModal').classList.add('active');
+        }
+
+        function closeGradeOptionsModal() {
+            document.getElementById('gradeOptionsModal').classList.remove('active');
+            currentGradeOptions = null;
+        }
+
+        function modifyGradeFromOptions() {
+            if (!currentGradeOptions) return;
+
+            closeGradeOptionsModal();
+            editGrade(
+                currentGradeOptions.subject,
+                currentGradeOptions.semester,
+                currentGradeOptions.index,
+                currentGradeOptions.isSemestriel
+            );
+        }
+
+        function deleteGradeFromOptions() {
+            if (!currentGradeOptions) return;
+
+            closeGradeOptionsModal();
+            deleteGrade(
+                currentGradeOptions.subject,
+                currentGradeOptions.semester,
+                currentGradeOptions.index,
+                currentGradeOptions.isSemestriel
+            );
         }
 
         function editGrade(subject, semester, index, isSemestriel) {
@@ -1543,13 +1590,13 @@
 
             const validAverages = Object.values(averages).filter(avg => avg !== null && avg !== undefined);
             const generalAvg = validAverages.length > 0
-                ? validAverages.reduce((a, b) => a + b, 0) / validAverages.length
+                ? roundToHalf(validAverages.reduce((a, b) => a + b, 0) / validAverages.length)
                 : 0;
 
             const ecoAvg = averages['Economie'];
             const droitAvg = averages['Droit'];
             const optionSpecifique = (ecoAvg && droitAvg)
-                ? (ecoAvg + droitAvg) / 2
+                ? roundToHalf((ecoAvg + droitAvg) / 2)
                 : (ecoAvg || droitAvg || 0);
 
             const frAvg = averages['Français'] || 0;
@@ -1557,8 +1604,8 @@
             const enAvg = averages['Anglais'] || 0;
             const mathAvg = averages['Math'] || 0;
 
-            const langAvg = (deAvg + enAvg) / 2;
-            const criticalTotal = frAvg + langAvg + mathAvg + optionSpecifique;
+            const langAvg = roundToHalf((deAvg + enAvg) / 2);
+            const criticalTotal = roundToHalf(frAvg + langAvg + mathAvg + optionSpecifique);
 
             const insufficient = [];
             Object.keys(averages).forEach(subject => {
@@ -1617,12 +1664,13 @@
 
         function updateMetricDisplay(elementId, value, threshold) {
             const elem = document.getElementById(elementId);
-            elem.textContent = value.toFixed(2);
+            const roundedValue = roundToHalf(value);
+            elem.textContent = roundedValue.toFixed(1);
             elem.className = 'metric-value';
 
-            if (value >= threshold) {
+            if (roundedValue >= threshold) {
                 elem.classList.add('good');
-            } else if (value >= threshold - 0.5) {
+            } else if (roundedValue >= threshold - 0.5) {
                 elem.classList.add('warning');
             } else {
                 elem.classList.add('danger');
@@ -1632,6 +1680,12 @@
         document.getElementById('addGradeModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeModal();
+            }
+        });
+
+        document.getElementById('gradeOptionsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeGradeOptionsModal();
             }
         });
 
