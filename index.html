@@ -625,9 +625,9 @@
                 <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
                     <strong>Exemple :</strong> En Math (50% régulier / 50% semestriel)<br>
                     Notes régulières : 4.0 (×1), 5.0 (×2), 3.0 (×1)<br>
-                    Moyenne régulière = (4.0 + 5.0 + 5.0 + 3.0) / 4 = 4.25 ≈ 4.5<br>
+                    Moyenne régulière = (4.0 + 5.0 + 5.0 + 3.0) / 4 = 4.25 ≈ 4.3<br>
                     Semestriel : 4.5<br>
-                    <strong>Moyenne finale = (4.5 × 0.5) + (4.5 × 0.5) = 4.5</strong>
+                    <strong>Moyenne finale = (4.3 × 0.5) + (4.5 × 0.5) = 4.4</strong>
                 </div>
 
                 <h3 style="font-size: 20px; font-weight: 700; color: #1f2937; margin-top: 24px; margin-bottom: 12px;">2. Conditions de Promotion Directe</h3>
@@ -913,9 +913,9 @@
             });
         }
 
-        // Round to nearest 0.5 (school rounding rules)
+        // Round to nearest 0.1 (school rounding rules)
         function roundToHalf(num) {
-            return Math.round(num * 2) / 2;
+            return Math.round(num * 10) / 10;
         }
 
         // Get color class based on grade value
@@ -1652,13 +1652,20 @@
                     status = 'Promotion par Tolérance';
                     statusClass = 'tolerance';
                 } else {
-                    status = '❌ Risque de Non-Promotion';
+                    status = 'Risque de Non-Promotion';
                     statusClass = 'fail';
                 }
             }
 
             const statusBanner = document.getElementById('statusBanner');
-            statusBanner.textContent = status;
+
+            // Add white X icon for fail status
+            if (statusClass === 'fail') {
+                statusBanner.innerHTML = '<span style="filter: grayscale(100%) brightness(200%);">❌</span> ' + status;
+            } else {
+                statusBanner.textContent = status;
+            }
+
             statusBanner.className = 'status-banner ' + statusClass;
         }
 
