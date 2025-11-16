@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -735,13 +735,13 @@
             <div class="modal-title" id="gradeOptionsTitle">Note: 4.5</div>
 
             <div style="display: flex; flex-direction: column; gap: 12px;">
-                <button class="btn btn-primary" onclick="modifyGradeFromOptions()" style="background: #3b82f6;">
+                <button class="btn btn-primary" id="modifyGradeBtn" style="background: #3b82f6;">
                     Modifier la Note
                 </button>
-                <button class="btn btn-secondary" onclick="deleteGradeFromOptions()" style="background: #ef4444; color: white;">
+                <button class="btn btn-secondary" id="deleteGradeBtn" style="background: #ef4444; color: white;">
                     Supprimer la Note
                 </button>
-                <button class="btn btn-secondary" onclick="closeGradeOptionsModal()">
+                <button class="btn btn-secondary" id="cancelGradeBtn">
                     Annuler
                 </button>
             </div>
@@ -1372,27 +1372,39 @@
         }
 
         function modifyGradeFromOptions() {
-            if (!currentGradeOptions) return;
+            console.log('modifyGradeFromOptions called', currentGradeOptions);
+            if (!currentGradeOptions) {
+                console.log('No currentGradeOptions!');
+                return;
+            }
+
+            // Save the values BEFORE closing modal (which sets currentGradeOptions to null)
+            const subject = currentGradeOptions.subject;
+            const semester = currentGradeOptions.semester;
+            const index = currentGradeOptions.index;
+            const isSemestriel = currentGradeOptions.isSemestriel;
 
             closeGradeOptionsModal();
-            editGrade(
-                currentGradeOptions.subject,
-                currentGradeOptions.semester,
-                currentGradeOptions.index,
-                currentGradeOptions.isSemestriel
-            );
+
+            editGrade(subject, semester, index, isSemestriel);
         }
 
         function deleteGradeFromOptions() {
-            if (!currentGradeOptions) return;
+            console.log('deleteGradeFromOptions called', currentGradeOptions);
+            if (!currentGradeOptions) {
+                console.log('No currentGradeOptions!');
+                return;
+            }
+
+            // Save the values BEFORE closing modal (which sets currentGradeOptions to null)
+            const subject = currentGradeOptions.subject;
+            const semester = currentGradeOptions.semester;
+            const index = currentGradeOptions.index;
+            const isSemestriel = currentGradeOptions.isSemestriel;
 
             closeGradeOptionsModal();
-            deleteGrade(
-                currentGradeOptions.subject,
-                currentGradeOptions.semester,
-                currentGradeOptions.index,
-                currentGradeOptions.isSemestriel
-            );
+
+            deleteGrade(subject, semester, index, isSemestriel);
         }
 
         function editGrade(subject, semester, index, isSemestriel) {
@@ -1689,9 +1701,32 @@
         });
 
         document.getElementById('gradeOptionsModal').addEventListener('click', function(e) {
-            if (e.target === this) {
+            // Only close if clicking the dark background, not the modal content
+            if (e.target.id === 'gradeOptionsModal') {
                 closeGradeOptionsModal();
             }
+        });
+
+        // Add event listeners for grade options modal buttons
+        document.getElementById('modifyGradeBtn').addEventListener('click', function(e) {
+            console.log('MODIFY BUTTON CLICKED!');
+            e.stopPropagation();
+            e.preventDefault();
+            modifyGradeFromOptions();
+        });
+
+        document.getElementById('deleteGradeBtn').addEventListener('click', function(e) {
+            console.log('DELETE BUTTON CLICKED!');
+            e.stopPropagation();
+            e.preventDefault();
+            deleteGradeFromOptions();
+        });
+
+        document.getElementById('cancelGradeBtn').addEventListener('click', function(e) {
+            console.log('CANCEL BUTTON CLICKED!');
+            e.stopPropagation();
+            e.preventDefault();
+            closeGradeOptionsModal();
         });
 
         try {
