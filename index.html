@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #2d3748;
             min-height: 100vh;
             padding: 10px;
             color: #333;
@@ -111,8 +111,8 @@
         }
 
         .grade-badge {
-            background: #e0e7ff;
-            color: #3730a3;
+            background: #e5e7eb;
+            color: #1f2937;
             padding: 8px 14px;
             border-radius: 12px;
             font-size: 20px;
@@ -120,6 +120,56 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            position: relative;
+            border: 2px solid #9ca3af;
+        }
+
+        /* Color coding based on grade value */
+        .grade-badge.grade-excellent {
+            background: #d1fae5;
+            color: #065f46;
+            border-color: #10b981;
+        }
+
+        .grade-badge.grade-good {
+            background: #dbeafe;
+            color: #1e40af;
+            border-color: #3b82f6;
+        }
+
+        .grade-badge.grade-sufficient {
+            background: #fef3c7;
+            color: #92400e;
+            border-color: #f59e0b;
+        }
+
+        .grade-badge.grade-insufficient {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #ef4444;
+        }
+
+        .grade-weight {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #ffffff;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .grade-weight.double {
+            background: #fef3c7;
+            color: #92400e;
+            border-color: #f59e0b;
         }
 
         .grade-delete {
@@ -414,11 +464,19 @@
         .slider-target-line {
             position: absolute;
             left: 60%;
-            top: 0;
-            bottom: 0;
             width: 3px;
             background: #1f2937;
             z-index: 5;
+        }
+
+        .slider-target-line-top {
+            top: 0;
+            height: calc(50% - 12px);
+        }
+
+        .slider-target-line-bottom {
+            bottom: 0;
+            height: calc(50% - 12px);
         }
 
         .slider-current-marker {
@@ -452,6 +510,21 @@
             font-weight: 600;
         }
 
+        .slider-middle-marker {
+            position: absolute;
+            left: 60%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 11px;
+            color: #1f2937;
+            font-weight: 700;
+            background: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            z-index: 7;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
         .status-banner {
             padding: 15px;
             border-radius: 10px;
@@ -472,8 +545,8 @@
         }
 
         .status-banner.fail {
-            background: #fee2e2;
-            color: #991b1b;
+            background: #dc2626;
+            color: #ffffff;
         }
 
         @media (max-width: 600px) {
@@ -486,12 +559,13 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📚 Mes Notes</h1>
+            <h1>Mes Notes</h1>
         </div>
 
         <div class="tab-buttons">
             <button class="tab-btn active" onclick="switchTab('grades')">Mes Notes</button>
             <button class="tab-btn" onclick="switchTab('projections')">Projections</button>
+            <button class="tab-btn" onclick="switchTab('rules')">Règles</button>
         </div>
 
         <!-- Grades Tab -->
@@ -505,37 +579,101 @@
             <div id="statusBanner" class="status-banner"></div>
 
             <div class="metrics-card">
-                <div style="font-size: 20px; font-weight: 700; margin-bottom: 12px; color: #1f2937;">📊 Situation</div>
+                <div style="font-size: 20px; font-weight: 700; margin-bottom: 12px; color: #1f2937;">Situation</div>
                 <div class="metrics-grid">
                     <div class="metric-item">
-                        <div class="metric-label">Moyenne</div>
+                        <div class="metric-label">Moyenne (≥4.0)</div>
                         <div class="metric-value" id="projAvg">-</div>
                     </div>
                     <div class="metric-item">
-                        <div class="metric-label">Option Spé.</div>
+                        <div class="metric-label">Option Spé. (≥4.0)</div>
                         <div class="metric-value" id="projOS">-</div>
                     </div>
                     <div class="metric-item">
-                        <div class="metric-label">Total Critique</div>
+                        <div class="metric-label">Total Critique (≥16.0)</div>
                         <div class="metric-value" id="projCrit">-</div>
                     </div>
                     <div class="metric-item">
-                        <div class="metric-label">Insuffisances</div>
+                        <div class="metric-label">Insuffisances (≤3, ≤1.0)</div>
                         <div class="metric-value" id="projInsuff">-</div>
                     </div>
                 </div>
             </div>
 
             <div style="background: white; border-radius: 12px; padding: 12px; margin-bottom: 12px;">
-                <div style="font-size: 16px; font-weight: 700; color: #1f2937; margin-bottom: 8px;">
-                    💡 Glisse les barres pour simuler
-                </div>
-                <div style="font-size: 14px; color: #6b7280;">
-                    Ajuste les moyennes et vois l'impact sur ta promotion
+                <div style="font-size: 16px; font-weight: 700; color: #1f2937;">
+                    Simule tes futures moyennes
                 </div>
             </div>
 
             <div id="slidersContainer"></div>
+        </div>
+
+        <!-- Rules Tab -->
+        <div id="rulesTab" class="tab-content">
+            <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 12px;">
+                <h2 style="font-size: 24px; font-weight: 700; color: #1f2937; margin-bottom: 16px;">Les Règles de Promotion</h2>
+
+                <h3 style="font-size: 20px; font-weight: 700; color: #1f2937; margin-top: 24px; margin-bottom: 12px;">1. Calcul de la Moyenne Annuelle</h3>
+                <p style="margin-bottom: 12px; line-height: 1.6;">La moyenne annuelle de chaque branche est calculée selon le poids des notes régulières et des examens semestriels :</p>
+                <ul style="margin-left: 20px; margin-bottom: 16px; line-height: 1.8;">
+                    <li><strong>Notes avec coefficient simple (×1) :</strong> Comptent pour leur valeur</li>
+                    <li><strong>Notes avec coefficient double (×2) :</strong> Comptent deux fois</li>
+                    <li><strong>Examens semestriels :</strong> Ont un poids spécifique selon la branche</li>
+                </ul>
+
+                <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                    <strong>Exemple :</strong> En Math (50% régulier / 50% semestriel)<br>
+                    Notes régulières : 4.0 (×1), 5.0 (×2), 3.0 (×1)<br>
+                    Moyenne régulière = (4.0 + 5.0 + 5.0 + 3.0) / 4 = 4.25 ≈ 4.5<br>
+                    Semestriel : 4.5<br>
+                    <strong>Moyenne finale = (4.5 × 0.5) + (4.5 × 0.5) = 4.5</strong>
+                </div>
+
+                <h3 style="font-size: 20px; font-weight: 700; color: #1f2937; margin-top: 24px; margin-bottom: 12px;">2. Conditions de Promotion Directe</h3>
+                <p style="margin-bottom: 12px; line-height: 1.6;">Pour être promu directement, l'élève doit avoir :</p>
+                <ul style="margin-left: 20px; margin-bottom: 16px; line-height: 1.8;">
+                    <li><strong>Moyenne générale ≥ 4.0</strong></li>
+                    <li><strong>Aucune insuffisance</strong> (toutes les branches ≥ 4.0)</li>
+                </ul>
+
+                <h3 style="font-size: 20px; font-weight: 700; color: #1f2937; margin-top: 24px; margin-bottom: 12px;">3. Conditions de Promotion par Tolérance</h3>
+                <p style="margin-bottom: 12px; line-height: 1.6;">Si l'élève a des insuffisances, il peut être promu par tolérance si <strong>TOUTES</strong> les conditions suivantes sont remplies :</p>
+                <ul style="margin-left: 20px; margin-bottom: 16px; line-height: 1.8;">
+                    <li><strong>Moyenne générale ≥ 4.0</strong></li>
+                    <li><strong>Option spécifique ≥ 4.0</strong> (moyenne de Économie et Droit)</li>
+                    <li><strong>Maximum 3 insuffisances</strong> (branches < 4.0)</li>
+                    <li><strong>Déficit total ≤ 1.0 point</strong> (somme des écarts à 4.0)</li>
+                    <li><strong>Total critique ≥ 16.0</strong> (Français + Moyenne des langues + Math + Option spécifique)</li>
+                </ul>
+
+                <div style="background: #fef3c7; padding: 12px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid #f59e0b;">
+                    <strong>Exemple de tolérance :</strong><br>
+                    Branches insuffisantes : Allemand 3.5, Chimie 3.5, Math 3.5<br>
+                    Nombre d'insuffisances : 3 ✓<br>
+                    Déficit total : (4.0-3.5) + (4.0-3.5) + (4.0-3.5) = 1.5 ✗<br>
+                    <strong>Résultat : Non promu (déficit trop élevé)</strong>
+                </div>
+
+                <h3 style="font-size: 20px; font-weight: 700; color: #1f2937; margin-top: 24px; margin-bottom: 12px;">4. Calcul du Total Critique</h3>
+                <p style="margin-bottom: 12px; line-height: 1.6;">Le total critique se calcule ainsi :</p>
+                <div style="background: #eff6ff; padding: 12px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid #3b82f6;">
+                    <strong>Total Critique = Français + ((Allemand + Anglais) / 2) + Math + ((Économie + Droit) / 2)</strong>
+                </div>
+                <p style="margin-bottom: 12px; line-height: 1.6;">Ce total doit être au minimum <strong>16.0 points</strong> pour la promotion par tolérance.</p>
+
+                <h3 style="font-size: 20px; font-weight: 700; color: #1f2937; margin-top: 24px; margin-bottom: 12px;">5. Pondération par Branche</h3>
+                <p style="margin-bottom: 12px; line-height: 1.6;">Chaque branche a sa propre pondération entre notes régulières et semestriels :</p>
+                <ul style="margin-left: 20px; margin-bottom: 16px; line-height: 1.8; font-size: 16px;">
+                    <li><strong>50% régulier / 50% semestriel :</strong> Math, Français, Histoire, Géographie, Économie, Droit, Chimie, Art, Gym, Informatique, Histoire de l'Art</li>
+                    <li><strong>60% régulier / 40% semestriel :</strong> Physique</li>
+                    <li><strong>67% régulier / 33% semestriel :</strong> Allemand, Anglais, Biologie</li>
+                </ul>
+
+                <div style="background: #fee2e2; padding: 12px; border-radius: 8px; margin-top: 24px; border-left: 4px solid #dc2626;">
+                    <strong>Important :</strong> Ces règles sont indicatives. Seule la décision officielle du conseil de classe fait foi.
+                </div>
+            </div>
         </div>
     </div>
 
@@ -562,6 +700,20 @@
                     <input type="checkbox" id="semestrielCheckbox">
                     <label for="semestrielCheckbox" class="form-label" style="margin: 0;">
                         C'est un Semestriel
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Poids de la note</label>
+                <div style="display: flex; gap: 10px;">
+                    <label style="flex: 1; cursor: pointer;">
+                        <input type="radio" name="gradeWeight" value="1" id="weightSingle" checked style="margin-right: 8px;">
+                        Simple (×1)
+                    </label>
+                    <label style="flex: 1; cursor: pointer;">
+                        <input type="radio" name="gradeWeight" value="2" id="weightDouble" style="margin-right: 8px;">
+                        Double (×2)
                     </label>
                 </div>
             </div>
@@ -598,11 +750,11 @@
 
         let gradesData = {
             'Allemand': {
-                semester1: { regular: [3.0], semestriel: null },
+                semester1: { regular: [{grade: 3.0, weight: 1}], semestriel: null },
                 semester2: { regular: [], semestriel: null }
             },
             'Anglais': {
-                semester1: { regular: [4.5], semestriel: null },
+                semester1: { regular: [{grade: 4.5, weight: 1}], semestriel: null },
                 semester2: { regular: [], semestriel: null }
             },
             'Art': {
@@ -610,27 +762,27 @@
                 semester2: { regular: [], semestriel: null }
             },
             'Biologie': {
-                semester1: { regular: [4.5, 5.5, 5.0], semestriel: null },
+                semester1: { regular: [{grade: 4.5, weight: 1}, {grade: 5.5, weight: 1}, {grade: 5.0, weight: 1}], semestriel: null },
                 semester2: { regular: [], semestriel: null }
             },
             'Chimie': {
-                semester1: { regular: [2.5, 2.5, 4.5], semestriel: null },
+                semester1: { regular: [{grade: 2.5, weight: 1}, {grade: 2.5, weight: 1}, {grade: 4.5, weight: 1}], semestriel: null },
                 semester2: { regular: [], semestriel: null }
             },
             'Droit': {
-                semester1: { regular: [4.5], semestriel: null },
+                semester1: { regular: [{grade: 4.5, weight: 1}], semestriel: null },
                 semester2: { regular: [], semestriel: null }
             },
             'Economie': {
-                semester1: { regular: [5.0], semestriel: null },
+                semester1: { regular: [{grade: 5.0, weight: 1}], semestriel: null },
                 semester2: { regular: [], semestriel: null }
             },
             'Français': {
-                semester1: { regular: [3.0, 3.5], semestriel: null },
+                semester1: { regular: [{grade: 3.0, weight: 1}, {grade: 3.5, weight: 1}], semestriel: null },
                 semester2: { regular: [], semestriel: null }
             },
             'Géographie': {
-                semester1: { regular: [4.5], semestriel: null },
+                semester1: { regular: [{grade: 4.5, weight: 1}], semestriel: null },
                 semester2: { regular: [], semestriel: null }
             },
             'Gym': {
@@ -642,24 +794,25 @@
                 semester2: { regular: [], semestriel: null }
             },
             'Histoire de l\'Art': {
-                semester1: { regular: [5.0, 5.0], semestriel: null },
+                semester1: { regular: [{grade: 5.0, weight: 1}, {grade: 5.0, weight: 1}], semestriel: null },
                 semester2: { regular: [], semestriel: null }
             },
             'Informatique': {
-                semester1: { regular: [5.0], semestriel: null },
+                semester1: { regular: [{grade: 5.0, weight: 1}], semestriel: null },
                 semester2: { regular: [], semestriel: null }
             },
             'Math': {
-                semester1: { regular: [3.5, 3.0], semestriel: null },
+                semester1: { regular: [{grade: 3.5, weight: 1}, {grade: 3.0, weight: 1}], semestriel: null },
                 semester2: { regular: [], semestriel: null }
             },
             'Physique': {
-                semester1: { regular: [4.0, 5.0], semestriel: null },
+                semester1: { regular: [{grade: 4.0, weight: 1}, {grade: 5.0, weight: 1}], semestriel: null },
                 semester2: { regular: [], semestriel: null }
             }
         };
 
         let selectedSubject = null;
+        let editingGrade = null; // { subject, semester, index, isSemestriel }
         let projectedAverages = {};
 
         function initializeData() {
@@ -692,6 +845,29 @@
                         // New format - use as is
                         gradesData = loadedData;
                     }
+
+                    // Migrate grades from numbers to objects with weight
+                    let needsMigration = false;
+                    Object.keys(gradesData).forEach(subject => {
+                        ['semester1', 'semester2'].forEach(semester => {
+                            if (gradesData[subject][semester].regular.length > 0) {
+                                // Check if first grade is a number (old format)
+                                if (typeof gradesData[subject][semester].regular[0] === 'number') {
+                                    needsMigration = true;
+                                    gradesData[subject][semester].regular =
+                                        gradesData[subject][semester].regular.map(grade => ({
+                                            grade: grade,
+                                            weight: 1
+                                        }));
+                                }
+                            }
+                        });
+                    });
+
+                    if (needsMigration) {
+                        console.log('Migrating grades to include weight property');
+                        saveData();
+                    }
                 }
             } catch (e) {
                 console.log('localStorage not available, using default data');
@@ -717,10 +893,33 @@
             });
         }
 
-        // Calculate average of grades
+        // Round to nearest 0.5 (school rounding rules)
+        function roundToHalf(num) {
+            return Math.round(num * 2) / 2;
+        }
+
+        // Get color class based on grade value
+        function getGradeColorClass(grade) {
+            if (grade >= 5.0) return 'grade-excellent'; // 5.0-6.0: Green
+            if (grade >= 4.5) return 'grade-good';      // 4.5-4.9: Blue
+            if (grade >= 4.0) return 'grade-sufficient'; // 4.0-4.4: Yellow
+            return 'grade-insufficient';                 // < 4.0: Red
+        }
+
+        // Calculate average of grades (weighted)
         function calculateAverage(grades) {
             if (!grades || grades.length === 0) return null;
-            return grades.reduce((a, b) => a + b, 0) / grades.length;
+
+            let totalWeightedGrade = 0;
+            let totalWeight = 0;
+
+            grades.forEach(gradeObj => {
+                totalWeightedGrade += gradeObj.grade * gradeObj.weight;
+                totalWeight += gradeObj.weight;
+            });
+
+            const average = totalWeight > 0 ? totalWeightedGrade / totalWeight : null;
+            return average !== null ? roundToHalf(average) : null;
         }
 
         // Calculate semester average for a subject
@@ -735,7 +934,8 @@
             if (regularAvg === null) return semestriel;
             if (semestriel === null) return regularAvg;
 
-            return (regularAvg * weights.regular) + (semestriel * weights.semestriels);
+            const semesterAvg = (regularAvg * weights.regular) + (semestriel * weights.semestriels);
+            return roundToHalf(semesterAvg);
         }
 
         // Calculate annual average for a subject
@@ -754,7 +954,8 @@
                 if (s1Avg === null && s2Avg === null) return null;
                 if (s1Avg === null) return s2Avg;
                 if (s2Avg === null) return s1Avg;
-                return (s1Avg + s2Avg) / 2;
+                const annualAvg = (s1Avg + s2Avg) / 2;
+                return roundToHalf(annualAvg);
             }
         }
 
@@ -788,20 +989,32 @@
 
                 // Regular grades S1
                 if (data.semester1.regular.length > 0) {
-                    data.semester1.regular.forEach((grade, index) => {
+                    data.semester1.regular.forEach((gradeObj, index) => {
                         const badge = document.createElement('span');
-                        badge.className = 'grade-badge';
-                        badge.textContent = grade.toFixed(1) + ' ';
+                        badge.className = 'grade-badge ' + getGradeColorClass(gradeObj.grade);
+                        badge.style.cursor = 'pointer';
+                        badge.textContent = gradeObj.grade.toFixed(1) + ' ';
+
+                        const weightIndicator = document.createElement('span');
+                        weightIndicator.className = 'grade-weight' + (gradeObj.weight === 2 ? ' double' : '');
+                        weightIndicator.textContent = gradeObj.weight;
+                        badge.appendChild(weightIndicator);
 
                         const deleteBtn = document.createElement('span');
                         deleteBtn.className = 'grade-delete';
                         deleteBtn.textContent = '×';
                         deleteBtn.onclick = (e) => {
                             e.stopPropagation();
-                            deleteGrade(subject, 1, index, false);
+                            showGradeOptions(subject, 1, index, false);
                         };
 
                         badge.appendChild(deleteBtn);
+                        badge.onclick = (e) => {
+                            if (!e.target.classList.contains('grade-delete')) {
+                                e.stopPropagation();
+                                showGradeOptions(subject, 1, index, false);
+                            }
+                        };
                         s1Grades.appendChild(badge);
                     });
                 } else {
@@ -821,6 +1034,7 @@
                 if (data.semester1.semestriel !== null) {
                     const badge = document.createElement('span');
                     badge.className = 'semestriel-badge';
+                    badge.style.cursor = 'pointer';
                     badge.textContent = data.semester1.semestriel.toFixed(1) + ' ';
 
                     const deleteBtn = document.createElement('span');
@@ -828,10 +1042,16 @@
                     deleteBtn.textContent = '×';
                     deleteBtn.onclick = (e) => {
                         e.stopPropagation();
-                        deleteGrade(subject, 1, 0, true);
+                        showGradeOptions(subject, 1, 0, true);
                     };
 
                     badge.appendChild(deleteBtn);
+                    badge.onclick = (e) => {
+                        if (!e.target.classList.contains('grade-delete')) {
+                            e.stopPropagation();
+                            showGradeOptions(subject, 1, 0, true);
+                        }
+                    };
                     s1SemestrielCell.appendChild(badge);
                 } else {
                     const emptySpan = document.createElement('span');
@@ -855,20 +1075,32 @@
 
                 // Regular grades S2
                 if (data.semester2.regular.length > 0) {
-                    data.semester2.regular.forEach((grade, index) => {
+                    data.semester2.regular.forEach((gradeObj, index) => {
                         const badge = document.createElement('span');
-                        badge.className = 'grade-badge';
-                        badge.textContent = grade.toFixed(1) + ' ';
+                        badge.className = 'grade-badge ' + getGradeColorClass(gradeObj.grade);
+                        badge.style.cursor = 'pointer';
+                        badge.textContent = gradeObj.grade.toFixed(1) + ' ';
+
+                        const weightIndicator = document.createElement('span');
+                        weightIndicator.className = 'grade-weight' + (gradeObj.weight === 2 ? ' double' : '');
+                        weightIndicator.textContent = gradeObj.weight;
+                        badge.appendChild(weightIndicator);
 
                         const deleteBtn = document.createElement('span');
                         deleteBtn.className = 'grade-delete';
                         deleteBtn.textContent = '×';
                         deleteBtn.onclick = (e) => {
                             e.stopPropagation();
-                            deleteGrade(subject, 2, index, false);
+                            showGradeOptions(subject, 2, index, false);
                         };
 
                         badge.appendChild(deleteBtn);
+                        badge.onclick = (e) => {
+                            if (!e.target.classList.contains('grade-delete')) {
+                                e.stopPropagation();
+                                showGradeOptions(subject, 2, index, false);
+                            }
+                        };
                         s2Grades.appendChild(badge);
                     });
                 } else {
@@ -888,6 +1120,7 @@
                 if (data.semester2.semestriel !== null) {
                     const badge = document.createElement('span');
                     badge.className = 'semestriel-badge';
+                    badge.style.cursor = 'pointer';
                     badge.textContent = data.semester2.semestriel.toFixed(1) + ' ';
 
                     const deleteBtn = document.createElement('span');
@@ -895,10 +1128,16 @@
                     deleteBtn.textContent = '×';
                     deleteBtn.onclick = (e) => {
                         e.stopPropagation();
-                        deleteGrade(subject, 2, 0, true);
+                        showGradeOptions(subject, 2, 0, true);
                     };
 
                     badge.appendChild(deleteBtn);
+                    badge.onclick = (e) => {
+                        if (!e.target.classList.contains('grade-delete')) {
+                            e.stopPropagation();
+                            showGradeOptions(subject, 2, 0, true);
+                        }
+                    };
                     s2SemestrielCell.appendChild(badge);
                 } else {
                     const emptySpan = document.createElement('span');
@@ -966,6 +1205,7 @@
             document.getElementById('subjectSelect').value = '';
             document.getElementById('gradeInput').value = '';
             document.getElementById('semestrielCheckbox').checked = false;
+            document.getElementById('weightSingle').checked = true;
             document.getElementById('semesterInfo').innerHTML = '';
             document.getElementById('addGradeModal').classList.add('active');
 
@@ -985,6 +1225,7 @@
             document.getElementById('subjectSelect').disabled = true;
             document.getElementById('gradeInput').value = '';
             document.getElementById('semestrielCheckbox').checked = false;
+            document.getElementById('weightSingle').checked = true;
             document.getElementById('addGradeModal').classList.add('active');
 
             updateSemesterInfo(subject);
@@ -997,13 +1238,17 @@
 
         function closeModal() {
             document.getElementById('addGradeModal').classList.remove('active');
+            document.getElementById('semestrielCheckbox').disabled = false;
+            document.querySelector('.btn-primary').textContent = 'Ajouter';
             selectedSubject = null;
+            editingGrade = null;
         }
 
         function saveGrade() {
             const subject = selectedSubject || document.getElementById('subjectSelect').value;
             const gradeValue = parseFloat(document.getElementById('gradeInput').value);
             const isSemestriel = document.getElementById('semestrielCheckbox').checked;
+            const weight = parseInt(document.querySelector('input[name="gradeWeight"]:checked').value);
 
             if (!subject) {
                 alert('Veuillez choisir une matière');
@@ -1022,41 +1267,118 @@
                 };
             }
 
-            // AUTO-DETECT which semester to add to
-            let semester = 1;
-            const s1Sem = gradesData[subject].semester1.semestriel;
-            const s2Sem = gradesData[subject].semester2.semestriel;
+            // Check if we're editing an existing grade
+            if (editingGrade) {
+                const semesterKey = 'semester' + editingGrade.semester;
 
-            if (isSemestriel) {
-                // For semestriel grades
-                if (s1Sem === null) {
-                    semester = 1;
-                } else if (s2Sem === null) {
-                    semester = 2;
+                if (editingGrade.isSemestriel) {
+                    gradesData[editingGrade.subject][semesterKey].semestriel = gradeValue;
                 } else {
-                    alert('Les 2 semestriels sont déjà entrés pour cette matière');
-                    return;
+                    gradesData[editingGrade.subject][semesterKey].regular[editingGrade.index] = {
+                        grade: gradeValue,
+                        weight: weight
+                    };
                 }
+
+                editingGrade = null;
             } else {
-                // For regular grades
-                if (s1Sem === null) {
-                    semester = 1; // Before S1 semestriel, add to S1
+                // AUTO-DETECT which semester to add to
+                let semester = 1;
+                const s1Sem = gradesData[subject].semester1.semestriel;
+                const s2Sem = gradesData[subject].semester2.semestriel;
+
+                if (isSemestriel) {
+                    // For semestriel grades
+                    if (s1Sem === null) {
+                        semester = 1;
+                    } else if (s2Sem === null) {
+                        semester = 2;
+                    } else {
+                        alert('Les 2 semestriels sont déjà entrés pour cette matière');
+                        return;
+                    }
                 } else {
-                    semester = 2; // After S1 semestriel, add to S2
+                    // For regular grades
+                    if (s1Sem === null) {
+                        semester = 1; // Before S1 semestriel, add to S1
+                    } else {
+                        semester = 2; // After S1 semestriel, add to S2
+                    }
                 }
-            }
 
-            const semesterKey = 'semester' + semester;
+                const semesterKey = 'semester' + semester;
 
-            if (isSemestriel) {
-                gradesData[subject][semesterKey].semestriel = gradeValue;
-            } else {
-                gradesData[subject][semesterKey].regular.push(gradeValue);
+                if (isSemestriel) {
+                    gradesData[subject][semesterKey].semestriel = gradeValue;
+                } else {
+                    gradesData[subject][semesterKey].regular.push({
+                        grade: gradeValue,
+                        weight: weight
+                    });
+                }
             }
 
             saveData();
             renderGrades();
             closeModal();
+        }
+
+        function showGradeOptions(subject, semester, index, isSemestriel) {
+            const semesterKey = 'semester' + semester;
+            let gradeValue, weight;
+
+            if (isSemestriel) {
+                gradeValue = gradesData[subject][semesterKey].semestriel;
+                weight = 1;
+            } else {
+                const gradeObj = gradesData[subject][semesterKey].regular[index];
+                gradeValue = gradeObj.grade;
+                weight = gradeObj.weight;
+            }
+
+            const message = `Note: ${gradeValue.toFixed(1)}\n\nQue veux-tu faire?`;
+            const choice = confirm(message + '\n\nOK = Modifier | Annuler = Supprimer');
+
+            if (choice) {
+                // Edit
+                editGrade(subject, semester, index, isSemestriel);
+            } else {
+                // Delete
+                deleteGrade(subject, semester, index, isSemestriel);
+            }
+        }
+
+        function editGrade(subject, semester, index, isSemestriel) {
+            editingGrade = { subject, semester, index, isSemestriel };
+
+            const semesterKey = 'semester' + semester;
+            let gradeValue, weight;
+
+            if (isSemestriel) {
+                gradeValue = gradesData[subject][semesterKey].semestriel;
+                weight = 1;
+            } else {
+                const gradeObj = gradesData[subject][semesterKey].regular[index];
+                gradeValue = gradeObj.grade;
+                weight = gradeObj.weight;
+            }
+
+            document.getElementById('modalTitle').textContent = `Modifier la Note - ${subject}`;
+            document.getElementById('subjectSelect').value = subject;
+            document.getElementById('subjectSelect').disabled = true;
+            document.getElementById('gradeInput').value = gradeValue;
+            document.getElementById('semestrielCheckbox').checked = isSemestriel;
+            document.getElementById('semestrielCheckbox').disabled = true;
+
+            if (weight === 2) {
+                document.getElementById('weightDouble').checked = true;
+            } else {
+                document.getElementById('weightSingle').checked = true;
+            }
+
+            document.getElementById('semesterInfo').innerHTML = '<strong>Modification de la note</strong>';
+            document.querySelector('.btn-primary').textContent = 'Modifier';
+            document.getElementById('addGradeModal').classList.add('active');
         }
 
         function deleteGrade(subject, semester, index, isSemestriel) {
@@ -1089,6 +1411,8 @@
             } else if (tabName === 'projections') {
                 document.getElementById('projectionsTab').classList.add('active');
                 initializeProjections();
+            } else if (tabName === 'rules') {
+                document.getElementById('rulesTab').classList.add('active');
             }
         }
 
@@ -1139,8 +1463,15 @@
                 fill.style.width = (((value - 1.0) / 5.0) * 100) + '%';
                 updateFillColor(fill, value);
 
-                const targetLine = document.createElement('div');
-                targetLine.className = 'slider-target-line';
+                const targetLineTop = document.createElement('div');
+                targetLineTop.className = 'slider-target-line slider-target-line-top';
+
+                const targetLineBottom = document.createElement('div');
+                targetLineBottom.className = 'slider-target-line slider-target-line-bottom';
+
+                const middleMarker = document.createElement('div');
+                middleMarker.className = 'slider-middle-marker';
+                middleMarker.textContent = '4.0';
 
                 const currentMarker = document.createElement('div');
                 currentMarker.className = 'slider-current-marker';
@@ -1148,7 +1479,7 @@
 
                 const markers = document.createElement('div');
                 markers.className = 'slider-markers';
-                markers.innerHTML = '<span class="slider-marker">1.0</span><span class="slider-marker">4.0</span><span class="slider-marker">6.0</span>';
+                markers.innerHTML = '<span class="slider-marker">1.0</span><span class="slider-marker" style="opacity:0;">4.0</span><span class="slider-marker">6.0</span>';
 
                 const input = document.createElement('input');
                 input.type = 'range';
@@ -1172,7 +1503,9 @@
                 });
 
                 sliderContainer.appendChild(fill);
-                sliderContainer.appendChild(targetLine);
+                sliderContainer.appendChild(targetLineTop);
+                sliderContainer.appendChild(targetLineBottom);
+                sliderContainer.appendChild(middleMarker);
                 sliderContainer.appendChild(currentMarker);
                 sliderContainer.appendChild(markers);
                 sliderContainer.appendChild(input);
@@ -1256,7 +1589,7 @@
             let statusClass = '';
 
             if (insufficient.length === 0) {
-                status = '✅ Promotion Directe';
+                status = 'Promotion Directe';
                 statusClass = 'pass';
             } else {
                 const conditions = {
@@ -1269,7 +1602,7 @@
 
                 if (conditions.generalAvg && conditions.optionSpec &&
                     conditions.insuffCount && conditions.deficitOk && conditions.criticalOk) {
-                    status = '⚠️ Promotion par Tolérance';
+                    status = 'Promotion par Tolérance';
                     statusClass = 'tolerance';
                 } else {
                     status = '❌ Risque de Non-Promotion';
